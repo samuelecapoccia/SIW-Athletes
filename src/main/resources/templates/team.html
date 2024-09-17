@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dettagli squadra</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/stile.css" rel="stylesheet">
+    <style>
+        .icon-delete::before {
+            content: "\1F5D1"; /* Unicode del cestino */
+            font-size: 18px;
+        }
+        
+        /* Bottone Rimuovi */
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%; /* Rende il bottone circolare */
+            font-size: 18px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+            line-height: 1; /* Allinea verticalmente il contenuto */
+        }
+        
+        .btn-delete:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+		/* Card e bottone mantengono le stesse dimensioni */
+		.card-add-team {
+		    display: flex;
+		    justify-content: center;
+		    align-items: center;
+		    background-color: transparent;
+		    color: #007bff;
+		    border: 3px solid #007bff;
+		    border-radius: 10px;
+		    height: 100%; /* Stessa altezza delle altre card */
+		    cursor: pointer;
+		    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+		    width: 100%; /* Occupa tutta la larghezza della colonna */
+		}
+		
+		.card-add-team:hover {
+		    background-color: rgba(0, 123, 255, 0.1);
+		    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+		}
+		
+		.icon-plus::before {
+		    content: "+";
+		    font-size: 96px;
+		    font-weight: bold;
+		    line-height: 1;
+		}
+
+        /* Contenitore per lo scroll orizzontale */
+        .card-container {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .card {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container-fluid">
+            <div class="row w-100">
+                <!-- Colonna sinistra (pulsante Squadre) -->
+                <div class="col-4 d-flex align-items-center">
+                    <!-- Bottone per il menu mobile a sinistra -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+    
+                    <!-- Link Squadre a sinistra -->
+                    <div class="collapse navbar-collapse">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom" th:href="@{/teams}">SQUADRE</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+    
+                <!-- Colonna centrale (Logo al centro) -->
+                <div class="col-4 d-flex justify-content-center align-items-center">
+                    <a class="navbar-brand" th:href="@{/}">
+                        <img th:src="@{/images/logo.png}" width="100" height="100" alt="Logo">
+                    </a>
+                </div>
+    
+                <!-- Colonna destra (Login/Logout e Profilo) -->
+                <div class="col-4 d-flex justify-content-end align-items-center">
+                    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <!-- Pulsante Profilo, visibile solo se autenticato -->
+                            <li class="nav-item me-2" th:if="${#authorization.expression('isAuthenticated()')}">
+                                <a class="nav-link nav-link-custom" th:href="@{/myProfile}">PROFILO</a>
+                            </li>
+    
+                            <!-- Logout con margine aggiuntivo a sinistra per creare spazio -->
+                            <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                                <a class="nav-link nav-link-custom" th:href="@{/logout}">LOGOUT</a>
+                            </li>
+    
+                            <!-- Login -->
+                            <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                                <a class="nav-link nav-link-custom" th:href="@{/login}">LOGIN</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Colonna sinistra: Dati della squadra e Logo -->
+            <div class="col-md-6 d-flex">
+                <!-- Logo -->
+                <div class="d-flex align-items-start me-4">
+                    <img th:src="${team.mainImagePath}" alt="Team Logo" class="img-fluid" style="max-width: 200px;">
+                </div>
+
+                <!-- Dettagli della squadra -->
+                <div class="d-flex flex-column justify-content-center ms-5">
+                    <h2><strong th:text="${team.name}"></strong></h2>
+                    <p><strong>Anno di fondazione:</strong> <span th:text="${team.foundationYear}"></span></p>
+                    <p><strong>Indirizzo:</strong> <span th:text="${team.address}"></span></p>
+                </div>
+            </div>
+
+            <!-- Colonna destra: Dettagli del presidente -->
+            <div class="col-md-6 d-flex justify-content-center align-items-center flex-column">
+                <div class="row">
+                    <!-- Colonna per l'immagine del presidente -->
+                    <div class="col-4 d-flex justify-content-center align-items-start">
+                        <img th:src="${profilePicPath}" alt="Presidente" class="img-fluid rounded-circle" style="max-width: 150px;">
+                    </div>
+            
+                    <!-- Colonna per i dettagli del presidente -->
+                    <div class="col-8">
+                        <div class="text-center">
+                            <h2><strong>Presidente</strong></h2>
+                            <p><strong>Nome:</strong> <span th:text="${president.name} + ' ' + ${president.surname}"></span></p>
+                            <p><strong>Codice Fiscale:</strong> <span th:text="${president.codiceFiscale}"></span></p>
+                            <p><strong>Data di nascita:</strong> <span th:text="${president.birthDate}"></span></p>
+                            <p><strong>Luogo di nascita:</strong> <span th:text="${president.birthPlace}"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+
+		<div class="container mt-5">
+		    <!-- Sezione dei giocatori -->
+		    <h2><strong>Giocatori</strong></h2>
+		    <p>Numero di giocatori: <span th:text="${team.players.size()}"></span></p>
+		    
+		    <div class="row">
+		        <!-- Card per i giocatori -->
+		        <div class="col-md-4 d-flex align-items-stretch mb-4" th:each="player : ${team.players}">
+		            <div class="card w-100">
+		                <div class="card-body">
+		                    <h5 class="card-title"><strong th:text="${player.name} + ' ' + ${player.surname}"></strong></h5>
+							<p></p>
+		                    <p class="card-text"><strong>Ruolo:</strong> <span th:text="${player.role}"></span></p>
+		                    <p class="card-text"><strong>Luogo di nascita:</strong> <span th:text="${player.birthPlace}"></span></p>
+		                    <p class="card-text"><strong>Data di nascita:</strong> <span th:text="${player.birthDate}"></span></p>
+		                    <p class="card-text"><strong>Inizio contratto:</strong> <span th:text="${player.contractStartDate}"></span></p>
+		                    <p class="card-text"><strong>Fine contratto:</strong> <span th:text="${player.contractFinishDate}"></span></p>
+		                    
+		                    <!-- Pulsante di rimozione visibile solo al presidente -->
+		                    <div th:if="${isPresident}">
+		                        <form th:action="@{/teams/{id}/removePlayer(id=${team.id})}" method="post">
+		                            <input type="hidden" name="playerId" th:value="${player.id}">
+		                            <button type="submit" class="btn btn-delete">
+		                                <span class="icon-delete"></span>
+		                            </button>
+		                        </form>
+		                    </div>
+		                </div>
+		            </div>
+		        </div>
+		        
+		        <!-- Bottone per aggiungere giocatore visibile solo al presidente -->
+		        <div th:if="${isPresident}" class="col-md-4 d-flex align-items-stretch mb-4">
+		            <a class="card-add-team w-100" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
+		                <span class="icon-plus"></span>
+		            </a>
+		        </div>
+		    </div>
+		</div>
+        
+        <!-- Modale per l'aggiunta del giocatore -->
+        <div class="modal fade" id="addPlayerModal" tabindex="-1" aria-labelledby="addPlayerModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPlayerModalLabel">Aggiungi Giocatore</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form th:action="@{/teams/{id}/addPlayer(id=${team.id})}" th:object="${newPlayer}" method="post">
+							<!-- Campo nascosto per l'ID del giocatore -->
+							<input type="hidden" th:field="*{id}">
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nome</label>
+                                <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="surname" class="form-label">Cognome</label>
+                                <input type="text" id="surname" th:field="*{surname}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Ruolo</label>
+                                <input type="text" id="role" th:field="*{role}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="birthDate" class="form-label">Data di Nascita</label>
+                                <input type="date" id="birthDate" th:field="*{birthDate}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="birthPlace" class="form-label">Luogo di Nascita</label>
+                                <input type="text" id="birthPlace" th:field="*{birthPlace}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contractStartDate" class="form-label">Data di Inizio Contratto</label>
+                                <input type="date" id="contractStartDate" th:field="*{contractStartDate}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contractFinishDate" class="form-label">Data di Fine Contratto</label>
+                                <input type="date" id="contractFinishDate" th:field="*{contractFinishDate}" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Aggiungi Giocatore</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

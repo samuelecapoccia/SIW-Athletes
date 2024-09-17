@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<hthtml lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squadre - SIW Athletes</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/stile.css" rel="stylesheet">
+    <style>
+        /* Stile personalizzato per i bottoni quadrati */
+        .btn-square {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            border-radius: 5px;
+            font-size: 20px;
+            text-align: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Bottoni di modifica ed eliminazione */
+        .btn-edit {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        /* Effetto hover per i bottoni */
+        .btn-edit:hover {
+            background-color: #0056b3; /* Blu più scuro */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Aggiunge un'ombra */
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333; /* Rosso più scuro */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Aggiunge un'ombra */
+        }
+
+        /* Creiamo l'icona matita con CSS */
+        .icon-edit::before {
+            content: "\270E"; /* Unicode della matita */
+            font-size: 18px;
+        }
+
+        /* Creiamo l'icona cestino con CSS */
+        .icon-delete::before {
+            content: "\1F5D1"; /* Unicode del cestino */
+            font-size: 18px;
+        }
+
+        /* Stile personalizzato per il bottone "Aggiungi Nuova Squadra" */
+        .card-add-team {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            color: #007bff;
+            border: 3px solid #007bff;
+            border-radius: 10px;
+            height: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-add-team:hover {
+            background-color: rgba(0, 123, 255, 0.1); /* Un leggero blu trasparente quando hoverato */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Effetto hover */
+        }
+
+        /* Grande icona "+" al centro senza "-". Usa ::before per evitare caratteri indesiderati */
+        .card-add-team .icon-plus::before {
+            content: "+"; /* Mostra solo il simbolo "+" */
+            font-size: 96px; /* Dimensione grande */
+            font-weight: bold;
+            line-height: 1; /* Evita spazi verticali */
+        }
+    </style>
+</head>
+<body>
+    <!--NAVBAR-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container-fluid">
+            <div class="row w-100">
+                <div class="col-4 d-flex align-items-center">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom" th:href="@{/teams}">SQUADRE</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-4 d-flex justify-content-center align-items-center">
+                    <a class="navbar-brand" th:href="@{/}">
+                        <img th:src="@{/images/logo.png}" width="100" height="100" alt="Logo">
+                    </a>
+                </div>
+
+                <div class="col-4 d-flex justify-content-end align-items-center">
+                    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item me-2" th:if="${#authorization.expression('isAuthenticated()')}">
+                                <a class="nav-link nav-link-custom" th:href="@{/myProfile}">PROFILO</a>
+                            </li>
+                            <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                                <a class="nav-link nav-link-custom" th:href="@{/logout}">LOGOUT</a>
+                            </li>
+                            <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                                <a class="nav-link nav-link-custom" th:href="@{/login}">LOGIN</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container text-center my-4">
+        <div class="row justify-content-md-center">
+            <div class="col col-lg-6">
+                <h1 class="nav-brand mainText">SQUADRE</h1>
+                <hr class="hr-style">
+            </div>
+        </div>
+    </div>
+
+    <div class="container-xl mx-auto my-2">
+        <div class="row mx-5 my-4 row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 justify-content-center">
+            <div th:if="${teams==null or teams.isEmpty()}" class="col-12">
+                <div class="alert alert-info" role="alert">
+                    Non ci sono squadre.
+                </div>
+            </div>
+
+            <!-- Ciclo sulle squadre esistenti -->
+            <div th:each="team : ${teams}" class="col">
+                <div class="card h-150 card-hover">
+                    <a th:href="@{/teams/{id}(id=${team.id})}">
+                        <img th:src="@{${team.mainImagePath}}" class="card-img-top" alt="Team Image">
+                    </a>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-3 w-100">
+                            <h4 class="card-title text-center mb-0 mx-3 flex-grow-1" th:text="${team.name}">Card title</h4>
+                        </div>
+                        <!-- Bottoni di Modifica ed Eliminazione -->
+                        <div class="d-flex justify-content-around w-100">
+                            <!-- Bottone Modifica (Icona Matita) -->
+                            <a th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}" class="btn btn-square btn-edit icon-edit" th:href="@{/admin/editTeam(id=${team.id})}">
+                            </a>
+
+                            <!-- Bottone Elimina (Icona Cestino) -->
+                            <form th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}" th:action="@{/admin/deleteTeam}" method="post">
+                                <input type="hidden" name="id" th:value="${team.id}" />
+                                <button type="submit" class="btn btn-square btn-delete icon-delete">
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottone Aggiungi Nuova Squadra come Card trasparente con bordi blu -->
+            <div th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}" class="col">
+                <a th:href="@{/admin/addTeam}" class="card-add-team">
+                    <span class="icon-plus"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

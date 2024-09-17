@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/stile.css}" rel="stylesheet"> <!-- eventuale CSS personalizzato -->
+    <title>Aggiungi Squadra</title>
+</head>
+<body>
+	<!--NAVBAR-->
+		<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+		    <div class="container-fluid">
+		        <div class="row w-100">
+		            <!-- Colonna sinistra (pulsante Squadre) -->
+		            <div class="col-4 d-flex align-items-center">
+		                <!-- Bottone per il menu mobile a sinistra -->
+		                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+		                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+		                    <span class="navbar-toggler-icon"></span>
+		                </button>
+		
+		                <!-- Link Squadre a sinistra -->
+		                <div class="collapse navbar-collapse">
+		                    <ul class="navbar-nav me-auto">
+		                        <li class="nav-item">
+		                            <a class="nav-link nav-link-custom" th:href="@{/teams}">SQUADRE</a>
+		                        </li>
+		                        <!-- Controllo del ruolo per visualizzare i bottoni -->
+		                        <li class="nav-item" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+		                            <a class="nav-link nav-link-custom" th:href="@{/teams/edit}">Modifica squadre</a>
+		                        </li>
+		                        <li class="nav-item" th:if="${#authorization.expression('hasRole(''PRESIDENT'')')}">
+		                            <a class="nav-link nav-link-custom" th:href="@{/players/edit}">Modifica giocatori</a>
+		                        </li>
+		                    </ul>
+		                </div>
+		            </div>
+		
+		            <!-- Colonna centrale (Logo al centro) -->
+		            <div class="col-4 d-flex justify-content-center align-items-center">
+		                <a class="navbar-brand" th:href="@{/}">
+		                    <img th:src="@{/images/logo.png}" width="100" height="100" alt="Logo">
+		                </a>
+		            </div>
+		
+		            <!-- Colonna destra (Login/Logout e Profilo) -->
+		            <div class="col-4 d-flex justify-content-end align-items-center">
+		                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+		                    <ul class="navbar-nav">
+		                        <!-- Pulsante Profilo, visibile solo se autenticato -->
+		                        <li class="nav-item me-2" th:if="${#authorization.expression('isAuthenticated()')}">
+		                            <a class="nav-link nav-link-custom" th:href="@{/myProfile}">PROFILO</a>
+		                        </li>
+		
+		                        <!-- Logout con margine aggiuntivo a sinistra per creare spazio -->
+		                        <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+		                            <a class="nav-link nav-link-custom" th:href="@{/logout}">LOGOUT</a>
+		                        </li>
+		
+		                        <!-- Login -->
+		                        <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+		                            <a class="nav-link nav-link-custom" th:href="@{/login}">LOGIN</a>
+		                        </li>
+		                    </ul>
+		                </div>
+		            </div>
+		        </div>
+		    </div>
+		</nav>
+    <div class="container">
+        <h2>Aggiungi una nuova squadra</h2>
+        <form th:action="@{/admin/addTeam}" th:object="${team}" method="post" enctype="multipart/form-data">
+            <!-- Campo Nome Squadra -->
+            <div class="mb-3">
+                <label for="name" class="form-label">Nome Squadra</label>
+                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                <div th:if="${#fields.hasErrors('name')}" class="text-danger">
+                    <p th:each="err : ${#fields.errors('name')}" th:text="${err}"></p>
+                </div>
+            </div>
+            <!-- Campo Anno di Fondazione -->
+            <div class="mb-3">
+                <label for="foundationYear" class="form-label">Anno di Fondazione</label>
+                <input type="number" class="form-control" id="foundationYear" th:field="*{foundationYear}" required>
+                <div th:if="${#fields.hasErrors('foundationYear')}" class="text-danger">
+                    <p th:each="err : ${#fields.errors('foundationYear')}" th:text="${err}"></p>
+                </div>
+            </div>
+            <!-- Campo Indirizzo -->
+            <div class="mb-3">
+                <label for="address" class="form-label">Indirizzo</label>
+                <input type="text" class="form-control" id="address" th:field="*{address}" required>
+                <div th:if="${#fields.hasErrors('address')}" class="text-danger">
+                    <p th:each="err : ${#fields.errors('address')}" th:text="${err}"></p>
+                </div>
+            </div>
+            <!-- Campo Presidente -->
+            <div class="mb-3">
+                <label for="president" class="form-label">Presidente</label>
+                <select class="form-control" id="president" th:field="*{president.id}" required>
+                    <option th:each="president : ${presidents}" th:value="${president.id}" th:text="${president.name} + ' ' + ${president.surname}"></option>
+                </select>
+                <div th:if="${#fields.hasErrors('president.id')}" class="text-danger">
+                    <p th:each="err : ${#fields.errors('president.id')}" th:text="${err}"></p>
+                </div>
+            </div>
+            <!-- Campo Immagine Principale -->
+            <div class="mb-3">
+                <label for="mainImage" class="form-label">Immagine Principale</label>
+                <input type="file" class="form-control" id="mainImage" name="file" required>
+                <div th:if="${#fields.hasErrors('mainImagePath')}" class="text-danger">
+                    <p th:each="err : ${#fields.errors('mainImagePath')}" th:text="${err}"></p>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Aggiungi Squadra</button>
+        </form>
+        <p th:if="${teamError}" class="mt-3 text-danger">Errore nell'aggiunta della squadra. Per favore, controlla i dettagli e riprova.</p>
+        <p th:if="${message}" th:text="${message}" class="mt-3 text-success"></p>
+    </div>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
